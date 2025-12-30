@@ -205,20 +205,16 @@ public:
       }
     }
     if (filter_whitelist.empty()) {
-        filter_whitelist.insert(NODE_NETWORK); // x1
-        filter_whitelist.insert(NODE_NETWORK | NODE_BLOOM); // x5
-        filter_whitelist.insert(NODE_NETWORK | NODE_WITNESS); // x9
-        filter_whitelist.insert(NODE_NETWORK | NODE_WITNESS | NODE_COMPACT_FILTERS); // x49
-        filter_whitelist.insert(NODE_NETWORK | NODE_WITNESS | NODE_P2P_V2); // x809
-        filter_whitelist.insert(NODE_NETWORK | NODE_WITNESS | NODE_P2P_V2 | NODE_COMPACT_FILTERS); //x849
-        filter_whitelist.insert(NODE_NETWORK | NODE_WITNESS | NODE_BLOOM); // xd
-        filter_whitelist.insert(NODE_NETWORK_LIMITED); // x400
-        filter_whitelist.insert(NODE_NETWORK_LIMITED | NODE_BLOOM); // x404
-        filter_whitelist.insert(NODE_NETWORK_LIMITED | NODE_WITNESS); // x408
-        filter_whitelist.insert(NODE_NETWORK_LIMITED | NODE_WITNESS | NODE_COMPACT_FILTERS); // x448
-        filter_whitelist.insert(NODE_NETWORK_LIMITED | NODE_WITNESS | NODE_P2P_V2); // xc08
-        filter_whitelist.insert(NODE_NETWORK_LIMITED | NODE_WITNESS | NODE_P2P_V2 | NODE_COMPACT_FILTERS); // xc48
-        filter_whitelist.insert(NODE_NETWORK_LIMITED | NODE_WITNESS | NODE_BLOOM); // x40c
+        for (const auto sf : {NODE_NONE, NODE_BIP444}) {
+        for (const auto nt : {NODE_NETWORK, NODE_NETWORK_LIMITED}) {
+            filter_whitelist.insert(sf | nt | NODE_WITNESS);
+            filter_whitelist.insert(sf | nt | NODE_WITNESS | NODE_P2P_V2);
+        for (const auto feat : {NODE_COMPACT_FILTERS, NODE_BLOOM}) {
+            filter_whitelist.insert(sf | nt | NODE_WITNESS | feat);
+            filter_whitelist.insert(sf | nt | NODE_WITNESS | NODE_P2P_V2 | feat);
+        }
+        }
+        }
     }
     if (host != NULL && ns == NULL) showHelp = true;
     if (showHelp) fprintf(stderr, help, argv[0]);
