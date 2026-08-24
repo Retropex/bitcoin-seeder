@@ -205,16 +205,16 @@ public:
       }
     }
     if (filter_whitelist.empty()) {
-        for (const auto sf : {NODE_NONE, NODE_BIP444}) {
+      for (const auto sf : {NODE_NONE, NODE_BIP444, NODE_BLAKE2B}) {
         for (const auto nt : {NODE_NETWORK, NODE_NETWORK_LIMITED}) {
-            filter_whitelist.insert(sf | nt | NODE_WITNESS);
-            filter_whitelist.insert(sf | nt | NODE_WITNESS | NODE_P2P_V2);
-        for (const auto feat : {NODE_COMPACT_FILTERS, NODE_BLOOM}) {
-            filter_whitelist.insert(sf | nt | NODE_WITNESS | feat);
-            filter_whitelist.insert(sf | nt | NODE_WITNESS | NODE_P2P_V2 | feat);
+          filter_whitelist.insert(sf | nt | NODE_WITNESS);
+          filter_whitelist.insert(sf | nt | NODE_WITNESS | NODE_P2P_V2);
+          for (const auto feat : {NODE_COMPACT_FILTERS, NODE_BLOOM}) {
+              filter_whitelist.insert(sf | nt | NODE_WITNESS | feat);
+              filter_whitelist.insert(sf | nt | NODE_WITNESS | NODE_P2P_V2 | feat);
+          }
         }
-        }
-        }
+      }
     }
     if (host != NULL && ns == NULL) showHelp = true;
     if (showHelp) fprintf(stderr, help, argv[0]);

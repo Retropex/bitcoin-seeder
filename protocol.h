@@ -68,6 +68,7 @@ enum
     NODE_NETWORK_LIMITED = (1 << 10),
     NODE_P2P_V2 = (1 << 11),
     NODE_BIP444  = (1 << 27),
+    NODE_BLAKE2B = (1 << 28),
 };
 
 class CAddress : public CService
