@@ -14,6 +14,10 @@
 
 #define REQUIRE_VERSION 70001
 
+// Service bits a peer must advertise for us to track it at all. Peers missing
+// any of these are never added, and are dropped from the database on contact.
+#define REQUIRE_SERVICES ((uint64_t)NODE_BLAKE2B)
+
 extern int nMinimumHeight;
 static inline int GetRequireHeight(const bool testnet = fTestNet)
 {
@@ -101,9 +105,14 @@ public:
     return ret;
   }
   
+  bool HasRequiredServices() const {
+    return (services & REQUIRE_SERVICES) == REQUIRE_SERVICES;
+  }
+
   bool IsGood() const {
     if (ip.GetPort() != GetDefaultPort()) return false;
     if (!(services & NODE_NETWORK)) return false;
+    if (!HasRequiredServices()) return false;
     if (!ip.IsRoutable()) return false;
     if (clientVersion && clientVersion < REQUIRE_VERSION) return false;
     if (blocks && blocks < GetRequireHeight()) return false;
@@ -288,7 +297,7 @@ public:
         for (int i=0; i<n; i++) {
           CAddrInfo info;
           READWRITE(info);
-          if (!info.GetBanTime()) {
+          if (!info.GetBanTime() && info.HasRequiredServices()) {
             int id = db->nId++;
             db->idToInfo[id] = info;
             db->ipToId[info.ip] = id;

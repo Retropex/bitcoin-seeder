@@ -5,6 +5,8 @@ using namespace std;
 
 int nMinimumHeight = 0;
 
+static const int REQUIRE_SERVICES_BANTIME = 86400;
+
 void CAddrInfo::Update(bool good) {
   uint32_t now = time(NULL);
   if (ourLastTry == 0)
@@ -81,6 +83,15 @@ void CAddrDb::Good_(const CService &addr, int clientV, std::string clientSV, int
   info.clientSubVersion = clientSV;
   info.blocks = blocks;
   info.services = services;
+  if (!info.HasRequiredServices()) {
+    CService ipp = info.ip;
+    goodId.erase(id);
+    idToInfo.erase(id);
+    ipToId.erase(ipp);
+    banned[ipp] = time(NULL) + REQUIRE_SERVICES_BANTIME;
+    nDirty++;
+    return;
+  }
   info.Update(true);
   if (info.IsGood() && goodId.count(id)==0) {
     goodId.insert(id);
@@ -132,6 +143,8 @@ void CAddrDb::Skipped_(const CService &addr)
 
 void CAddrDb::Add_(const CAddress &addr, bool force) {
   if (!force && !addr.IsRoutable())
+    return;
+  if (!force && (addr.nServices & REQUIRE_SERVICES) != REQUIRE_SERVICES)
     return;
   CService ipp(addr);
   if (banned.count(ipp)) {
